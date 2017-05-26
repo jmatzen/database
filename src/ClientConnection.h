@@ -23,6 +23,8 @@ public:
 
 	ClientConnection(key, boost::asio::io_service& svc);
 
+  ~ClientConnection();
+
 	auto& Socket() {
 		return socket_;
 	}
@@ -36,10 +38,10 @@ public:
 private:
 	void HandleWrite(const boost::system::error_code&, size_t);
 	void HandleRead(const boost::system::error_code&, size_t);
-
+  void StartRead();
 	boost::asio::ip::tcp::socket socket_;
 	
-	std::deque<std::vector<char>> outbuf_;
+	std::deque<std::unique_ptr<char[]>> outbuf_;
 	std::vector<char> inbuf_;
 	std::mutex mutex_;
 	std::condition_variable cond_;

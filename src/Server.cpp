@@ -1,5 +1,6 @@
 #include "Server.h"
 #include "ClientConnection.h"
+#include "Logging.h"
 
 using namespace boost;
 using namespace boost::asio;
@@ -24,7 +25,12 @@ void Server::HandleAccept(
 	std::shared_ptr<ClientConnection> con,
 	const boost::system::error_code& e)
 {
-	if (!e)
-		con->Start();
+  if (e) {
+    jm::log(jm::LOG_WARN, "failed to acceppt connection, e = %s", e);
+  }
+  else {
+    con->Start();
+  }
 	StartAccept();
 }
+
