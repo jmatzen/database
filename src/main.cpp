@@ -11,7 +11,7 @@ int main() {
 
 	try {
 		io_service iosrv;
-		Server server(iosrv);
+		jm::net::Server server(iosrv);
 		for (int i = 0; i < 4; ++i) {
 			threadPool.create_thread([&iosrv] 
 			{

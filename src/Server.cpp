@@ -4,6 +4,7 @@
 
 using namespace boost;
 using namespace boost::asio;
+using namespace jm::net;
 using boost::asio::ip::tcp;
 
 Server::Server(io_service& iosvc)

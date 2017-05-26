@@ -6,44 +6,55 @@
 #include <mutex>
 #include <condition_variable>
 
-class ClientConnection
-	: public std::enable_shared_from_this<ClientConnection>
+namespace jm
 {
-	/*
-		prevents anybody from creating this class
-	 */
-	struct key {};
+  namespace filter
+  {
+    class ClientFilter;
+  }
 
-public:
-	typedef std::shared_ptr<ClientConnection> ptr;
+  namespace net
+  {
+    class ClientConnection
+      : public std::enable_shared_from_this<ClientConnection>
+    {
+      /*
+      prevents anybody from creating this class
+      */
+      struct key {};
 
-	static ptr Create(boost::asio::io_service& svc) {
-		return std::make_shared<ClientConnection>(key(), svc);
-	}
+    public:
+      typedef std::shared_ptr<ClientConnection> ptr;
 
-	ClientConnection(key, boost::asio::io_service& svc);
+      static ptr Create(boost::asio::io_service& svc);
 
-  ~ClientConnection();
+      ClientConnection(key, boost::asio::io_service& svc);
 
-	auto& Socket() {
-		return socket_;
-	}
+      ~ClientConnection();
 
-	void Start();
+      auto& Socket() {
+        return socket_;
+      }
 
-	void Write(const std::string& s);
+      void Start();
+
+      void Write(const std::string& s);
 
 
 
-private:
-	void HandleWrite(const boost::system::error_code&, size_t);
-	void HandleRead(const boost::system::error_code&, size_t);
-  void StartRead();
-	boost::asio::ip::tcp::socket socket_;
-	
-	std::deque<std::unique_ptr<char[]>> outbuf_;
-	std::vector<char> inbuf_;
-	std::mutex mutex_;
-	std::condition_variable cond_;
-};
+    private:
+      void HandleWrite(const boost::system::error_code&, size_t);
+      void HandleRead(const boost::system::error_code&, size_t);
+      void StartRead();
+      boost::asio::ip::tcp::socket socket_;
 
+      std::deque<std::unique_ptr<char[]>> outbuf_;
+      std::vector<char> inbuf_;
+      std::mutex mutex_;
+      std::condition_variable cond_;
+      std::shared_ptr<filter::ClientFilter> filter_;
+    };
+
+
+  }
+}

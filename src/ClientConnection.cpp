@@ -1,10 +1,13 @@
 #include "ClientConnection.h"
+#include "ClientFilter.h"
 #include "Logging.h"
 #include <iostream>
 
 
 using namespace boost;
 using namespace boost::asio;
+using namespace jm::net;
+using namespace jm::filter;
 using boost::asio::ip::tcp;
 
 ClientConnection::ClientConnection(key, io_service& svc)
@@ -78,11 +81,19 @@ void ClientConnection::HandleRead(
 	size_t count)
 {
 	if (count > 0) {
-		std::cout.write(inbuf_.data(), count);
-		Write(std::string(inbuf_.begin(), inbuf_.begin() + count));
+		//std::cout.write(inbuf_.data(), count);
+		//Write(std::string(inbuf_.begin(), inbuf_.begin() + count));
+    filter_->Read(inbuf_.data(), count);
     StartRead();
   }
   else {
     jm::log(jm::LOG_INFO, "socket is closed count=%d", count);
   }
+}
+
+
+ClientConnection::ptr ClientConnection::Create(boost::asio::io_service& svc) {
+  auto con = std::make_shared<ClientConnection>(key(), svc);
+  con->filter_ = std::make_shared<ClientFilter>(con);
+  return con;
 }
