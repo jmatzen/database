@@ -81,8 +81,6 @@ void ClientConnection::HandleRead(
 	size_t count)
 {
 	if (count > 0) {
-		//std::cout.write(inbuf_.data(), count);
-		//Write(std::string(inbuf_.begin(), inbuf_.begin() + count));
     filter_->Read(inbuf_.data(), count);
     StartRead();
   }

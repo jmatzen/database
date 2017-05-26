@@ -1,7 +1,8 @@
 #pragma once
 
 #include <memory>
-#include <string>
+#include <vector>
+#include <rapidjson/fwd.h>
 
 
 namespace jm::net
@@ -20,9 +21,11 @@ namespace jm::filter
     void Read(const char* buffer, size_t size);
     void Write(const char* buffer, size_t size);
   private:
-    void Parse(const std::string& s);
+    void Parse(size_t length);
+    void HandleDocument(const rapidjson::Document& doc);
+
 
     std::weak_ptr<net::ClientConnection> connection_;
-    std::string input_;
+    std::vector<char> input_;
   };
 }
