@@ -43,7 +43,7 @@ void ClientConnection::Write(const std::string& s)
   {
     std::unique_lock<std::mutex> lk(mutex_);
     // store buffer
-    outbuf_.emplace_back(std::move(buf));
+    outbuf_.push_back(std::move(buf));
   }
 
   // write to socket
@@ -85,6 +85,7 @@ void ClientConnection::HandleRead(
     StartRead();
   }
   else {
+    filter_->Read(nullptr, 0); // flush filter
     jm::log(jm::LOG_INFO, "socket is closed count=%d", count);
   }
 }

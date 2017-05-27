@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <vector>
-#include <rapidjson/fwd.h>
+#include <rapidjson/document.h>
 
 
 namespace jm::net
@@ -14,7 +14,7 @@ namespace jm::filter
 {
 
   class ClientFilter
-    : std::enable_shared_from_this<ClientFilter>
+    : public std::enable_shared_from_this<ClientFilter>
   {
   public:
     ClientFilter(std::shared_ptr<net::ClientConnection> connection);
@@ -23,8 +23,9 @@ namespace jm::filter
   private:
     void Parse(size_t length);
     void HandleDocument(const rapidjson::Document& doc);
+    void HandleInsert(const rapidjson::Value& value);
 
-
+  private:
     std::weak_ptr<net::ClientConnection> connection_;
     std::vector<char> input_;
   };

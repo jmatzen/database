@@ -14,19 +14,22 @@ namespace rj = rapidjson;
 ClientFilter::ClientFilter(ClientConnection::ptr connection)
   : connection_(connection)
 {
-
 }
 
 void ClientFilter::Read(const char* buffer, size_t size)
 {
-  input_.insert(input_.end(), buffer, buffer + size);
-  for (;;) {
-    auto it = std::find(input_.begin(), input_.end(), '\n');
-    if (it == input_.end())
-      break;
-    Parse(std::distance(input_.begin(), it));
-    input_.erase(input_.begin(), it+1);
-  } 
+  if (size == 0) {
+    Parse(input_.size());
+  } else {
+    input_.insert(input_.end(), buffer, buffer + size);
+    for (;;) {
+      auto it = std::find(input_.begin(), input_.end(), '\n');
+      if (it == input_.end())
+        break;
+      Parse(std::distance(input_.begin(), it));
+      input_.erase(input_.begin(), it+1);
+    }     
+  }
 }
 
 void ClientFilter::Write(const char* buffer, size_t size)
@@ -55,5 +58,18 @@ void ClientFilter::HandleDocument(const rj::Document& doc)
   rj::PrettyWriter<rj::StringBuffer> writer(buf);
   doc.Accept(writer);
   log(LOG_TRACE, "%s", buf.GetString());
+  auto member = doc.FindMember("command");
+  if (member->value.IsString()) {
+    auto command = std::string(member->value.GetString());
+    if (command.compare("insert") == 0) {
+      if (doc.HasMember("data")) {
+        HandleInsert(doc["data"]);
+      }
+    }
+  }
+}
 
+void ClientFilter::HandleInsert(const rj::Value& value)
+{
+  
 }
