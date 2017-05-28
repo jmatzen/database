@@ -1,6 +1,8 @@
 #include "ClientFilter.h"
 #include "ClientConnection.h"
 #include "Logging.h"
+#include "AppContext.h"
+#include "Database.h"
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/prettywriter.h>
@@ -19,7 +21,9 @@ ClientFilter::ClientFilter(ClientConnection::ptr connection)
 void ClientFilter::Read(const char* buffer, size_t size)
 {
   if (size == 0) {
-    Parse(input_.size());
+    if (!input_.empty()) {
+      Parse(input_.size());
+    }
   } else {
     input_.insert(input_.end(), buffer, buffer + size);
     for (;;) {
@@ -54,22 +58,24 @@ void ClientFilter::Parse(size_t length)
 
 void ClientFilter::HandleDocument(const rj::Document& doc)
 {
-  rj::StringBuffer buf;
-  rj::PrettyWriter<rj::StringBuffer> writer(buf);
-  doc.Accept(writer);
-  log(LOG_TRACE, "%s", buf.GetString());
-  auto member = doc.FindMember("command");
-  if (member->value.IsString()) {
-    auto command = std::string(member->value.GetString());
-    if (command.compare("insert") == 0) {
-      if (doc.HasMember("data")) {
-        HandleInsert(doc["data"]);
-      }
-    }
-  }
+  //rj::StringBuffer buf;
+  //rj::PrettyWriter<rj::StringBuffer> writer(buf);
+  //doc.Accept(writer);
+  //log(LOG_TRACE, "%s", buf.GetString());
+  //auto member = doc.FindMember("command");
+  //if (member  && member->value.IsString()) {
+  //  auto command = std::string(member->value.GetString());
+  //  if (command.compare("insert") == 0) {
+  //    if (doc.HasMember("data")) {
+  //      HandleInsert(doc["data"]);
+  //    }
+  //  }
+  //}
+  HandleInsert(doc);
 }
 
 void ClientFilter::HandleInsert(const rj::Value& value)
 {
-  
+  auto& db = AppContext::GetAppContext().GetService<Database>();
+  db.Insert(value);
 }

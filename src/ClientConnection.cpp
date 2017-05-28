@@ -14,7 +14,7 @@ ClientConnection::ClientConnection(key, io_service& svc)
 	: socket_(svc)
 {
   jm::log(jm::LOG_INFO, "created client connection %1%", this);
-  inbuf_.resize(1);
+  inbuf_.resize(65536);
 }
 
 ClientConnection::~ClientConnection()
